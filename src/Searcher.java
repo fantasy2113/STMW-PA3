@@ -51,9 +51,10 @@ public class Searcher {
     results.clear();
     searchRuntime = 0;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
+      text = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
       searchStartTime = System.nanoTime();
       preprocessingStartTime = searchStartTime;
-      preprocessing();
+      offlinePreprocessing();
       preprocessingRuntime += (System.nanoTime() - preprocessingStartTime);
       simpleSearch();
       searchRuntime += (System.nanoTime() - searchStartTime);
@@ -109,14 +110,14 @@ public class Searcher {
     return -1;
   }
 
-  public static void preprocessing() {
-    prepareText();
+  public static void offlinePreprocessing() {
+    prepareTextForOffline();
     L = new ArrayList<>(Arrays.asList(text.split(" ")));
     Collections.sort(L);
-    buildLCP();
+    buildPatLCP();
   }
 
-  private static void buildLCP() {
+  private static void buildPatLCP() {
     LCP.put(-1, "");
     for (int i = 0; i < L.size(); i++) {
       LCP.put(i, lcp(pat, L.get(i)));
@@ -144,7 +145,7 @@ public class Searcher {
     }
   }
 
-  private static void prepareText() {
+  private static void prepareTextForOffline() {
     text = text.replaceAll("\\.", "").replaceAll(",", "")
         .replaceAll(":", "").replaceAll("!", "")
         .replaceAll("\\?", "").replaceAll(";", "")
