@@ -22,8 +22,6 @@ public class Searcher {
     long preprocessingStartTime = 0;
     long preprocessingRuntime = 0;
 
-    prepareText();
-
     System.out.println("Pattern search: " + pat);
     System.out.println("File: " + args[1]);
     System.out.println();
@@ -112,6 +110,7 @@ public class Searcher {
   }
 
   public static void preprocessing() {
+    prepareText();
     L = new ArrayList<>(Arrays.asList(text.split(" ")));
     Collections.sort(L);
     buildLCP();
