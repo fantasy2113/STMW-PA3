@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Searcher {
 
@@ -9,6 +6,7 @@ public class Searcher {
   private static final String pat = "hallo";
   private static final String text = "fsdfsdfsdfsdfsdhalldfsdfdsfdshallodfsdgdfg fgdfgdfg hell asdasdasdasdg halloaddasd hallo";
   private static List<String> L = new ArrayList<>();
+  private static final Map<Integer, String> LCP = new HashMap<>();
 
   public static void main(String... args) {
     int runs = 10;
@@ -42,44 +40,35 @@ public class Searcher {
     searchRuntime = 0;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
       searchStartTime = System.nanoTime();
-      L = new ArrayList<>(Arrays.asList(text.split(" ")));
-      Collections.sort(L);
+      preprocessing();
       simpleSearch();
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
     System.out.println("\t\t-Search runtime (Nano): " + (searchRuntime / runs));
   }
 
-
   public static boolean naiveSlidingWindow(boolean intelligent) {
     if (intelligent) {
       initLastOcc(pat);
     }
-
     final int n = text.length();
     final int m = pat.length();
-
     int i = 0;
     while (i <= (n - m)) {
-
       int j = 0;
       while (j < m && pat.charAt(j) == text.charAt(i + j)) {
         j++;
       }
-
       if (j == m) {
         System.out.println("\t\t- PATTERN \"" + pat + "\" MATCH AT [" + i + ", " + (i + (m - 2)) + "]");
         return true;
       }
-
       if (intelligent) {
         i += lastOcc[text.charAt(i + m - 1)];
       } else {
         i++;
       }
-
     }
-
     System.out.println("\t\t- PATTERN \"" + pat + "\" NO MATCH");
     return false;
   }
@@ -88,11 +77,9 @@ public class Searcher {
     int d = -1;
     int f = L.size();
     final int m = pat.length();
-
     while ((d + 1) < f) {
       int i = (d + f) / 2;
-      final int l = lcp(pat, L.get(i));
-
+      final int l = LCP.get(i).length();
       if (l == m && l == L.get(i).length()) {
         System.out.println("\t\t- PATTERN \"" + pat + "\" MATCH AT INDEX: " + i);
         return String.valueOf(i);
@@ -102,12 +89,24 @@ public class Searcher {
         f = i;
       }
     }
-
     System.out.println("\t\t- PATTERN \"" + pat + "\" NO MATCH");
     return "(" + d + "," + f + ")";
   }
 
-  private static int lcp(String u, String v) {
+  public static void preprocessing() {
+    L = new ArrayList<>(Arrays.asList(text.split(" ")));
+    Collections.sort(L);
+    buildLCP();
+  }
+
+  private static void buildLCP() {
+    LCP.put(-1, "");
+    for (int i = 0; i < L.size(); i++) {
+      LCP.put(i, lcp(pat, L.get(i)));
+    }
+  }
+
+  private static String lcp(String u, String v) {
     int lcp = 0;
     int end = Math.min(u.length(), v.length());
     for (int i = 0; i < end; i++) {
@@ -115,7 +114,7 @@ public class Searcher {
         lcp++;
       }
     }
-    return lcp;
+    return u.substring(0, lcp);
   }
 
   private static void initLastOcc(String pat) {
