@@ -34,6 +34,7 @@ public class Searcher {
     }
 
     System.out.println("Sliding Window = " + indices);
+    System.out.println("Hits = " + indices.size());
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
     System.out.println();
 
@@ -45,21 +46,23 @@ public class Searcher {
     }
 
     System.out.println("Sliding Window with last-occ = " + indices);
+    System.out.println("Hits = " + indices.size());
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
     System.out.println();
 
     searchRuntime = 0;
+    int indice = -1;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
       text = readText(args[1]);
       searchStartTime = System.nanoTime();
       preprocessingStartTime = searchStartTime;
       offlineSearchPreprocessing();
       preprocessingRuntime += (System.nanoTime() - preprocessingStartTime);
-      indices = simpleSearch();
+      indice = simpleSearch(-1, L.size());
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
 
-    System.out.println("Simple Search = " + indices);
+    System.out.println("Simple Search = " + indice);
     System.out.println("Preprocessing runtime (Nano): " + (preprocessingRuntime / runs));
     System.out.println("Search runtime (Nano): " + ((searchRuntime / runs) - (preprocessingRuntime / runs)));
   }
@@ -89,35 +92,36 @@ public class Searcher {
     return indices;
   }
 
-  public static List<Integer> simpleSearch() {
-    List<Integer> indices = new ArrayList<>();
-    int d = -1;
-    int f = L.size();
+  public static int simpleSearch(int d, int f) {
+    if ((d + 1) < f) {
+      return -1;
+    }
     final int m = pat.length();
     while ((d + 1) < f) {
       int i = (d + f) / 2;
       final int l = LCP.get(i).length();
       if (l == m && l == L.get(i).length()) {
-        indices.add(i);
-        f = i;
+        return i;
       } else if (l == L.get(i).length() || (l != m && L.get(i).charAt(l) < pat.charAt(l))) {
         d = i;
       } else {
         f = i;
       }
     }
-    return indices;
+    return simpleSearch(d, f);
   }
 
   public static void offlineSearchPreprocessing() {
-    prepareTextForOfflineSearch();
+    //prepareTextForOfflineSearch();
     L = new ArrayList<>(Arrays.asList(text.split(" ")));
+    // Set<String> set =  new HashSet<>(L);
+    // L = new ArrayList<>(set);
+    // L.remove("");
     Collections.sort(L);
     buildPatLCP();
   }
 
   private static void buildPatLCP() {
-    LCP.put(-1, "");
     for (int i = 0; i < L.size(); i++) {
       LCP.put(i, lcp(pat, L.get(i)));
     }
@@ -137,7 +141,7 @@ public class Searcher {
   private static void initLastOcc(String pat) {
     final int m = pat.length();
     Arrays.fill(lastOcc, m);
-    for (int k = 0; k < m - 2; k++) {
+    for (int k = 0; k <= m - 2; k++) {
       lastOcc[pat.charAt(k)] = m - 1 - k;
     }
   }
@@ -147,7 +151,7 @@ public class Searcher {
         .replaceAll(":", "").replaceAll("!", "")
         .replaceAll("\\?", "").replaceAll(";", "")
         .replaceAll("\n", "").replaceAll("\r", "")
-        .replaceAll("\r\n", "");
+        .replaceAll("\r\n", "").replaceAll("\\(", "").replaceAll("\\)", "");
   }
 
   private static String readText(String arg) throws IOException {
