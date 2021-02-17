@@ -93,6 +93,9 @@ public class Searcher {
   }
 
   public static int simpleSearch(int d, int f) {
+    if ((d + 1) >= f) {
+      return -1;
+    }
     final int m = pat.length();
     while ((d + 1) < f) {
       int i = (d + f) / 2;
