@@ -117,6 +117,7 @@ public class Searcher {
     Set<String> set = new HashSet<>(L);
     L = new ArrayList<>(set);
     L.remove("");
+    L.remove(" ");
     Collections.sort(L);
     buildPatLCP();
   }
@@ -147,7 +148,7 @@ public class Searcher {
   }
 
   private static void prepareTextForOfflineSearch() {
-    text = text.replaceAll("[^a-zA-Z 0-9]", "");
+    text = text.replaceAll("[^a-zA-Z 0-9]", " ");
   }
 
   private static String readText(String arg) throws IOException {
