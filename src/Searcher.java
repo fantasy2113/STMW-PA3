@@ -137,9 +137,7 @@ public class Searcher {
 
   private static void initLastOcc(String pat) {
     final int m = pat.length();
-    for (int a = 0; a < lastOcc.length; a++) {
-      lastOcc[a] = m;
-    }
+    Arrays.fill(lastOcc, m);
     for (int k = 0; k < m - 2; k++) {
       lastOcc[pat.charAt(k)] = m - 1 - k;
     }
