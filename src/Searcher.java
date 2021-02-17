@@ -50,8 +50,6 @@ public class Searcher {
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
     System.out.println();
 
-    cleanText();
-
     searchRuntime = 0;
     int indice = -1;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
@@ -113,10 +111,9 @@ public class Searcher {
   }
 
   public static void offlineSearchPreprocessing() {
-    Set<String> set = new HashSet<>(new ArrayList<>(Arrays.asList(text.split(" "))));
+    Set<String> set = new HashSet<>(new ArrayList<>(Arrays.asList(text.split("\\W+"))));
+    set.remove("");
     L = new ArrayList<>(set);
-    L.remove("");
-    L.remove(" ");
     Collections.sort(L);
     buildPatLCP();
   }
@@ -144,10 +141,6 @@ public class Searcher {
     for (int k = 0; k <= m - 2; k++) {
       lastOcc[pat.charAt(k)] = m - 1 - k;
     }
-  }
-
-  private static void cleanText() {
-    text = text.replaceAll("[^a-zA-Z 0-9]", " ");
   }
 
   private static String readText(String arg) throws IOException {
