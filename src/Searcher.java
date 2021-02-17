@@ -10,21 +10,23 @@ public class Searcher {
   private static String text = "";
   private static List<String> L = new ArrayList<>();
   private static final Map<Integer, String> LCP = new HashMap<>();
+  private static final List<Integer> results = new ArrayList<>();
 
   public static void main(String... args) throws Exception {
     pat = args[0];
     text = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
-    prepareText();
 
     int runs = 10;
-
-    System.out.println("Pattern search: " + pat);
-    System.out.println("Sliding Window:");
-
     long searchRuntime = 0;
     long searchStartTime = 0;
     long preprocessingStartTime = 0;
     long preprocessingRuntime = 0;
+
+    prepareText();
+
+    System.out.println("Pattern search: " + pat);
+    System.out.println("File: " + args[1]);
+    System.out.println();
 
     for (int measurement1 = 0; measurement1 < runs; measurement1++) {
       searchStartTime = System.nanoTime();
@@ -32,9 +34,11 @@ public class Searcher {
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
 
+    System.out.println("Sliding Window = " + results);
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println("Sliding Window with last-occ:");
+    System.out.println();
 
+    results.clear();
     searchRuntime = 0;
     for (int measurement2 = 0; measurement2 < runs; measurement2++) {
       searchStartTime = System.nanoTime();
@@ -42,9 +46,11 @@ public class Searcher {
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
 
+    System.out.println("Sliding Window with last-occ = " + results);
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println("Simple Search:");
+    System.out.println();
 
+    results.clear();
     searchRuntime = 0;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
       searchStartTime = System.nanoTime();
@@ -54,16 +60,10 @@ public class Searcher {
       simpleSearch();
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
+
+    System.out.println("Simple Search = " + results);
     System.out.println("Preprocessing runtime (Nano): " + (preprocessingRuntime / runs));
     System.out.println("Search runtime (Nano): " + ((searchRuntime / runs) - (preprocessingRuntime / runs)));
-  }
-
-  private static void prepareText() {
-    text = text.replaceAll("\\.", "").replaceAll(",", "")
-        .replaceAll(":", "").replaceAll("!", "")
-        .replaceAll("\\?", "").replaceAll(";", "")
-        .replaceAll("\n", "").replaceAll("\r", "")
-        .replaceAll("\r\n", "");
   }
 
   public static boolean naiveSlidingWindow(boolean intelligent) {
@@ -79,7 +79,7 @@ public class Searcher {
         j++;
       }
       if (j == m) {
-        System.out.println("[" + i + ", " + (i + m) + "]");
+        results.add(i);
         return true;
       }
       if (intelligent) {
@@ -99,7 +99,7 @@ public class Searcher {
       int i = (d + f) / 2;
       final int l = LCP.get(i).length();
       if (l == m && l == L.get(i).length()) {
-        System.out.println("[" + i + "]");
+        results.add(i);
         return i;
       } else if (l == L.get(i).length() || (l != m && L.get(i).charAt(l) < pat.charAt(l))) {
         d = i;
@@ -107,6 +107,7 @@ public class Searcher {
         f = i;
       }
     }
+    results.add(-1);
     return -1;
   }
 
@@ -142,5 +143,13 @@ public class Searcher {
     for (int k = 0; k < m - 2; k++) {
       lastOcc[pat.charAt(k)] = m - 1 - k;
     }
+  }
+
+  private static void prepareText() {
+    text = text.replaceAll("\\.", "").replaceAll(",", "")
+        .replaceAll(":", "").replaceAll("!", "")
+        .replaceAll("\\?", "").replaceAll(";", "")
+        .replaceAll("\n", "").replaceAll("\r", "")
+        .replaceAll("\r\n", "");
   }
 }
