@@ -7,11 +7,11 @@ import java.util.*;
 public class Searcher {
 
   private static final int[] lastOcc = new int[256];
-  private static String pat = "";
-  private static String text = "";
-  private static List<String> L = new ArrayList<>();
   private static final Map<Integer, String> LCP = new HashMap<>();
   private static final List<Integer> results = new ArrayList<>();
+  private static List<String> L = new ArrayList<>();
+  private static String pat = null;
+  private static String text = null;
 
   public static void main(String... args) throws Exception {
     pat = args[0];
