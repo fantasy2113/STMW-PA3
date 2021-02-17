@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -14,7 +15,7 @@ public class Searcher {
 
   public static void main(String... args) throws Exception {
     pat = args[0];
-    text = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
+    text = readText(args[1]);
 
     int runs = 10;
     long searchRuntime = 0;
@@ -51,10 +52,10 @@ public class Searcher {
     results.clear();
     searchRuntime = 0;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
-      text = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
+      text = readText(args[1]);
       searchStartTime = System.nanoTime();
       preprocessingStartTime = searchStartTime;
-      offlinePreprocessing();
+      offlineSearchPreprocessing();
       preprocessingRuntime += (System.nanoTime() - preprocessingStartTime);
       simpleSearch();
       searchRuntime += (System.nanoTime() - searchStartTime);
@@ -106,12 +107,11 @@ public class Searcher {
         f = i;
       }
     }
-    results.add(-1);
     return -1;
   }
 
-  public static void offlinePreprocessing() {
-    prepareTextForOffline();
+  public static void offlineSearchPreprocessing() {
+    prepareTextForOfflineSearch();
     L = new ArrayList<>(Arrays.asList(text.split(" ")));
     Collections.sort(L);
     buildPatLCP();
@@ -143,11 +143,15 @@ public class Searcher {
     }
   }
 
-  private static void prepareTextForOffline() {
+  private static void prepareTextForOfflineSearch() {
     text = text.replaceAll("\\.", "").replaceAll(",", "")
         .replaceAll(":", "").replaceAll("!", "")
         .replaceAll("\\?", "").replaceAll(";", "")
         .replaceAll("\n", "").replaceAll("\r", "")
         .replaceAll("\r\n", "");
+  }
+
+  private static String readText(String arg) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(arg)), StandardCharsets.UTF_8);
   }
 }
