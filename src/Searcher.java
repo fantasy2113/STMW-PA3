@@ -1,21 +1,30 @@
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Searcher {
 
   private static final int[] lastOcc = new int[256];
-  private static final String pat = "hallo";
-  private static final String text = "fsdfsdfsdfsdfsdhalldfsdfdsfdshallodfsdgdfg fgdfgdfg hell asdasdasdasdg halloaddasd hallo";
+  private static String pat = "";
+  private static String text = "";
   private static List<String> L = new ArrayList<>();
   private static final Map<Integer, String> LCP = new HashMap<>();
 
-  public static void main(String... args) {
+  public static void main(String... args) throws Exception {
+    pat = args[0];
+    text = new String(Files.readAllBytes(Paths.get(args[1])), StandardCharsets.UTF_8);
+    prepareText();
+
     int runs = 10;
 
-    System.out.println("- Online Search:");
-    System.out.println("\t- Sliding Window:");
+    System.out.println("Pattern search: " + pat);
+    System.out.println("Sliding Window:");
 
     long searchRuntime = 0;
-    long searchStartTime;
+    long searchStartTime = 0;
+    long preprocessingStartTime = 0;
+    long preprocessingRuntime = 0;
 
     for (int measurement1 = 0; measurement1 < runs; measurement1++) {
       searchStartTime = System.nanoTime();
@@ -23,8 +32,8 @@ public class Searcher {
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
 
-    System.out.println("\t\t- Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println("\t- Sliding Window with last-occ:");
+    System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
+    System.out.println("Sliding Window with last-occ:");
 
     searchRuntime = 0;
     for (int measurement2 = 0; measurement2 < runs; measurement2++) {
@@ -33,18 +42,28 @@ public class Searcher {
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
 
-    System.out.println("\t\t-Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println("- Offline Search:");
-    System.out.println("\t- Simple Search:");
+    System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
+    System.out.println("Simple Search:");
 
     searchRuntime = 0;
     for (int measurement3 = 0; measurement3 < runs; measurement3++) {
       searchStartTime = System.nanoTime();
+      preprocessingStartTime = searchStartTime;
       preprocessing();
+      preprocessingRuntime += (System.nanoTime() - preprocessingStartTime);
       simpleSearch();
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
-    System.out.println("\t\t-Search runtime (Nano): " + (searchRuntime / runs));
+    System.out.println("Preprocessing runtime (Nano): " + (preprocessingRuntime / runs));
+    System.out.println("Search runtime (Nano): " + ((searchRuntime / runs) - (preprocessingRuntime / runs)));
+  }
+
+  private static void prepareText() {
+    text = text.replaceAll("\\.", "").replaceAll(",", "")
+        .replaceAll(":", "").replaceAll("!", "")
+        .replaceAll("\\?", "").replaceAll(";", "")
+        .replaceAll("\n", "").replaceAll("\r", "")
+        .replaceAll("\r\n", "");
   }
 
   public static boolean naiveSlidingWindow(boolean intelligent) {
@@ -60,7 +79,7 @@ public class Searcher {
         j++;
       }
       if (j == m) {
-        System.out.println("\t\t- PATTERN \"" + pat + "\" MATCH AT [" + i + ", " + (i + (m - 2)) + "]");
+        System.out.println("[" + i + ", " + (i + m) + "]");
         return true;
       }
       if (intelligent) {
@@ -69,11 +88,10 @@ public class Searcher {
         i++;
       }
     }
-    System.out.println("\t\t- PATTERN \"" + pat + "\" NO MATCH");
     return false;
   }
 
-  public static String simpleSearch() {
+  public static int simpleSearch() {
     int d = -1;
     int f = L.size();
     final int m = pat.length();
@@ -81,16 +99,15 @@ public class Searcher {
       int i = (d + f) / 2;
       final int l = LCP.get(i).length();
       if (l == m && l == L.get(i).length()) {
-        System.out.println("\t\t- PATTERN \"" + pat + "\" MATCH AT INDEX: " + i);
-        return String.valueOf(i);
+        System.out.println("[" + i + "]");
+        return i;
       } else if (l == L.get(i).length() || (l != m && L.get(i).charAt(l) < pat.charAt(l))) {
         d = i;
       } else {
         f = i;
       }
     }
-    System.out.println("\t\t- PATTERN \"" + pat + "\" NO MATCH");
-    return "(" + d + "," + f + ")";
+    return -1;
   }
 
   public static void preprocessing() {
