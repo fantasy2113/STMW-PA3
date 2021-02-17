@@ -93,9 +93,6 @@ public class Searcher {
   }
 
   public static int simpleSearch(int d, int f) {
-    if ((d + 1) < f) {
-      return -1;
-    }
     final int m = pat.length();
     while ((d + 1) < f) {
       int i = (d + f) / 2;
@@ -112,11 +109,11 @@ public class Searcher {
   }
 
   public static void offlineSearchPreprocessing() {
-    //prepareTextForOfflineSearch();
+    prepareTextForOfflineSearch();
     L = new ArrayList<>(Arrays.asList(text.split(" ")));
-    // Set<String> set =  new HashSet<>(L);
-    // L = new ArrayList<>(set);
-    // L.remove("");
+    Set<String> set = new HashSet<>(L);
+    L = new ArrayList<>(set);
+    L.remove("");
     Collections.sort(L);
     buildPatLCP();
   }
@@ -147,11 +144,7 @@ public class Searcher {
   }
 
   private static void prepareTextForOfflineSearch() {
-    text = text.replaceAll("\\.", "").replaceAll(",", "")
-        .replaceAll(":", "").replaceAll("!", "")
-        .replaceAll("\\?", "").replaceAll(";", "")
-        .replaceAll("\n", "").replaceAll("\r", "")
-        .replaceAll("\r\n", "").replaceAll("\\(", "").replaceAll("\\)", "");
+    text = text.replaceAll("[^a-zA-Z 0-9]", "");
   }
 
   private static String readText(String arg) throws IOException {
