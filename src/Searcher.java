@@ -25,6 +25,9 @@ public class Searcher {
   public static void main(String... args) throws Exception {
     setArgs(args);
     printStart(args[1]);
+
+    naiveSlidingWindow(true);
+
     search();
   }
 
