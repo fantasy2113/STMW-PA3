@@ -6,6 +6,9 @@ import java.util.*;
 
 public class Searcher {
 
+  private Searcher() {
+  }
+
   private static final int[] lastOcc = new int[256];
   private static final Map<Integer, String> LCP = new HashMap<>();
   private static final int runs = 10;
@@ -22,6 +25,10 @@ public class Searcher {
   public static void main(String... args) throws Exception {
     setArgs(args);
     printStart(args[1]);
+    search();
+  }
+
+  private static void search() {
     for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
       resultIndices = naiveSlidingWindow(false);
@@ -50,7 +57,7 @@ public class Searcher {
     text = readText(args[1]);
   }
 
-  public static List<Integer> naiveSlidingWindow(boolean intelligent) {
+  private static List<Integer> naiveSlidingWindow(boolean intelligent) {
     List<Integer> indices = new ArrayList<>();
     if (intelligent) {
       initLastOcc(pat);
@@ -75,7 +82,7 @@ public class Searcher {
     return indices;
   }
 
-  public static int simpleSearch(int d, int f) {
+  private static int simpleSearch(int d, int f) {
     final int m = pat.length();
     while ((d + 1) < f) {
       int i = (d + f) / 2;
@@ -91,7 +98,7 @@ public class Searcher {
     return -1;
   }
 
-  public static void offlineSearchPreprocessing() {
+  private static void offlineSearchPreprocessing() {
     Set<String> set = new HashSet<>(new ArrayList<>(Arrays.asList(text.split("\\W+"))));
     set.remove("");
     L = new ArrayList<>(set);
