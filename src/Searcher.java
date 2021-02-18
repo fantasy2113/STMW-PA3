@@ -26,8 +26,12 @@ public class Searcher {
     setArgs(args);
     printStart(args[1]);
 
+    // cpu wake up
     for (int i = 0; i < 3; i++) {
-      naiveSlidingWindow(false); // cpu wake up
+      naiveSlidingWindow(false);
+      naiveSlidingWindow(true);
+      offlineSearchPreprocessing();
+      simpleSearch(-1, L.size());
     }
 
     search();
