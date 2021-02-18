@@ -27,13 +27,13 @@ public class Searcher {
       resultIndices = naiveSlidingWindow(false);
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
-    printSearchResultOnline("Sliding Window = ");
+    printSearchResultOnline("Sliding Window");
     for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
       resultIndices = naiveSlidingWindow(true);
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
-    printSearchResultOnline("Sliding Window with last-occ = ");
+    printSearchResultOnline("Sliding Window with last-occ");
     for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
       preprocessingStartTime = searchStartTime;
@@ -129,7 +129,7 @@ public class Searcher {
   }
 
   private static void printSearchResultOnline(String search) {
-    System.out.println(search + resultIndices);
+    System.out.println(search + " = " + resultIndices);
     System.out.println("Hits = " + resultIndices.size());
     System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
     System.out.println();
