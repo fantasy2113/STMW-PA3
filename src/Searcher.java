@@ -27,11 +27,13 @@ public class Searcher {
     printStart(args[1]);
 
     // cpu wake up
-    for (int i = 0; i < 3; i++) {
-      naiveSlidingWindow(false);
-      naiveSlidingWindow(true);
-      offlineSearchPreprocessing();
-      simpleSearch(-1, L.size());
+    if (args.length == 3 && args[2].equals("wakeup")) {
+      for (int i = 0; i < 3; i++) {
+        naiveSlidingWindow(false);
+        naiveSlidingWindow(true);
+        offlineSearchPreprocessing();
+        simpleSearch(-1, L.size());
+      }
     }
 
     search();
