@@ -8,62 +8,46 @@ public class Searcher {
 
   private static final int[] lastOcc = new int[256];
   private static final Map<Integer, String> LCP = new HashMap<>();
-  private static List<Integer> indices = new ArrayList<>();
+  private static final int runs = 10;
   private static List<String> L = new ArrayList<>();
+  private static List<Integer> resultIndices = new ArrayList<>();
+  private static long searchRuntime = 0;
+  private static long searchStartTime = 0;
+  private static long preprocessingStartTime = 0;
+  private static long preprocessingRuntime = 0;
+  private static int resultIndex = -1;
   private static String pat = null;
   private static String text = null;
 
   public static void main(String... args) throws Exception {
-    pat = args[0];
-    text = readText(args[1]);
-
-    int runs = 10;
-    long searchRuntime = 0;
-    long searchStartTime = 0;
-    long preprocessingStartTime = 0;
-    long preprocessingRuntime = 0;
-
-    System.out.println("Pattern search: " + pat);
-    System.out.println("File: " + args[1]);
-    System.out.println();
-
-    for (int measurement1 = 0; measurement1 < runs; measurement1++) {
+    setArgs(args);
+    printStart(args[1]);
+    for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
-      indices = naiveSlidingWindow(false);
+      resultIndices = naiveSlidingWindow(false);
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
-
-    System.out.println("Sliding Window = " + indices);
-    System.out.println("Hits = " + indices.size());
-    System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println();
-
-    searchRuntime = 0;
-    for (int measurement2 = 0; measurement2 < runs; measurement2++) {
+    printSearchResultOnline("Sliding Window = ");
+    for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
-      indices = naiveSlidingWindow(true);
+      resultIndices = naiveSlidingWindow(true);
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
-
-    System.out.println("Sliding Window with last-occ = " + indices);
-    System.out.println("Hits = " + indices.size());
-    System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
-    System.out.println();
-
-    searchRuntime = 0;
-    int indice = -1;
-    for (int measurement3 = 0; measurement3 < runs; measurement3++) {
+    printSearchResultOnline("Sliding Window with last-occ = ");
+    for (int measurement = 0; measurement < runs; measurement++) {
       searchStartTime = System.nanoTime();
       preprocessingStartTime = searchStartTime;
       offlineSearchPreprocessing();
       preprocessingRuntime += (System.nanoTime() - preprocessingStartTime);
-      indice = simpleSearch(-1, L.size());
+      resultIndex = simpleSearch(-1, L.size());
       searchRuntime += (System.nanoTime() - searchStartTime);
     }
+    printOfflineSearch();
+  }
 
-    System.out.println("Simple Search = " + indice);
-    System.out.println("Preprocessing runtime (Nano): " + (preprocessingRuntime / runs));
-    System.out.println("Search runtime (Nano): " + ((searchRuntime / runs) - (preprocessingRuntime / runs)));
+  private static void setArgs(String[] args) throws IOException {
+    pat = args[0];
+    text = readText(args[1]);
   }
 
   public static List<Integer> naiveSlidingWindow(boolean intelligent) {
@@ -92,9 +76,6 @@ public class Searcher {
   }
 
   public static int simpleSearch(int d, int f) {
-    if ((d + 1) >= f) {
-      return -1;
-    }
     final int m = pat.length();
     while ((d + 1) < f) {
       int i = (d + f) / 2;
@@ -107,7 +88,7 @@ public class Searcher {
         f = i;
       }
     }
-    return simpleSearch(d, f);
+    return -1;
   }
 
   public static void offlineSearchPreprocessing() {
@@ -145,5 +126,30 @@ public class Searcher {
 
   private static String readText(String arg) throws IOException {
     return new String(Files.readAllBytes(Paths.get(arg)), StandardCharsets.UTF_8);
+  }
+
+  private static void printSearchResultOnline(String search) {
+    System.out.println(search + resultIndices);
+    System.out.println("Hits = " + resultIndices.size());
+    System.out.println("Search runtime (Nano): " + (searchRuntime / runs));
+    System.out.println();
+    searchRuntime = 0;
+    resultIndices.clear();
+  }
+
+  private static void printStart(String arg) {
+    System.out.println("Pattern search: " + pat);
+    System.out.println("File: " + arg);
+    System.out.println();
+    searchRuntime = 0;
+    preprocessingRuntime = 0;
+  }
+
+  private static void printOfflineSearch() {
+    System.out.println("Simple Search = [" + resultIndex + "]");
+    System.out.println("Preprocessing runtime (Nano): " + (preprocessingRuntime / runs));
+    System.out.println("Search runtime (Nano): " + ((searchRuntime / runs) - (preprocessingRuntime / runs)));
+    searchRuntime = 0;
+    preprocessingRuntime = 0;
   }
 }
