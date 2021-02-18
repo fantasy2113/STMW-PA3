@@ -10,7 +10,7 @@ public class Searcher {
   }
 
   private static final int[] lastOcc = new int[256];
-  private static final Map<Integer, String> LCP = new HashMap<>();
+  private static Map<Integer, String> LCP = new HashMap<>();
   private static final int runs = 10;
   private static List<String> L = new ArrayList<>();
   private static List<Integer> resultIndices = new ArrayList<>();
@@ -118,6 +118,7 @@ public class Searcher {
   }
 
   private static void buildPatLCP() {
+    LCP = new HashMap<>();
     for (int i = 0; i < L.size(); i++) {
       LCP.put(i, lcp(pat, L.get(i)));
     }
