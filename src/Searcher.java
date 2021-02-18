@@ -145,6 +145,7 @@ public class Searcher {
   }
 
   private static void printStart(String arg) {
+    System.out.println();
     System.out.println("Pattern search: " + pat);
     System.out.println("File: " + arg);
     System.out.println();
