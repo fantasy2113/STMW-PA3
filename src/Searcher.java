@@ -101,7 +101,7 @@ public class Searcher {
       final int l = LCP.get(i).length();
       if (l == m && l == L.get(i).length()) {
         return i;
-      } else if (l == L.get(i).length() || (l != m && L.get(i).charAt(l) < pat.charAt(l))) {
+      } else if (l == L.get(i).length() || (l != m && L.get(i).compareTo(pat) < pat.compareTo(L.get(i)))) {
         d = i;
       } else {
         f = i;
