@@ -110,6 +110,7 @@ public class Searcher {
   }
 
   private static void offlineSearchPreprocessing() {
+    pat = pat.replaceAll("\\W+", "");
     Set<String> set = new HashSet<>(new ArrayList<>(Arrays.asList(text.split("\\W+"))));
     set.remove("");
     L = new ArrayList<>(set);
